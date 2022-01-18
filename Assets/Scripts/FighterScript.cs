@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Managers;
 using Modules;
 using Modules.Commands;
 using ScriptableObjects;
@@ -46,11 +47,7 @@ public class FighterScript : MonoBehaviour
         
         if (!CanAttack) return;
         
-        var adversary = GameManagerScript.Instance.GetAdversaryFor(this);
-
-        if (adversary == null) return;
-        
-        adversary.DefendFrom(this);
+        CombatManager.Instance.HandleAttack(this);
 
         _timeSinceAttack = 0f;
     }
