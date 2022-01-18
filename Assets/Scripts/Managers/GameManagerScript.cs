@@ -30,12 +30,14 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        return;
         Text.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
+        return;
         if (IsGameOver) return;
         if (PlayerFighter.IsDead || AIFighter.IsDead)
         {
