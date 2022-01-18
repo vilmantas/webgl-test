@@ -13,23 +13,27 @@ namespace Managers
     public class AutomationManager : MonoBehaviour
     {
         [NonSerialized] 
-        private static AutomationManager _instance;
+        public static AutomationManager Instance;
 
         public float timeScale = 1f;
 
-        private float TimeDelta => Time.deltaTime;
+        public float TimeDelta => Time.deltaTime;
         
         private ConcurrentDictionary<GUID, TimingThing> _registrations = new ();
 
+        private bool _updateRunning = false;
+
+        private bool _canRunUpdate = true;
+        
         private void Awake()
         {
-            if (_instance != null)
+            if (Instance != null)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            _instance = this;
+            Instance = this;
         }
 
         private void Update()
@@ -39,16 +43,24 @@ namespace Managers
 
         private void UpdateRegistrations()
         {
+            if (!_canRunUpdate) return;
+            
+            _updateRunning = true;
+
             foreach (var (key, timingThing) in _registrations)
             {
-                timingThing.TimeValueRemaining -= TimeDelta;
-
+                if (!timingThing.IsActive) continue;
+                
                 if (timingThing.WaitTimeRemaining <= 0)
                 {
                     timingThing.Run();
                     timingThing.Reset();
                 }
+
+                timingThing.TimeValueRemaining -= TimeDelta;
             }
+            
+            _updateRunning = false;
         }
 
         public TimingThing Register(float interval, Action action)
@@ -77,7 +89,8 @@ namespace Managers
             public float Interval;
             public float TimeScale;
 
-            public bool IsActive = true;
+            private bool _isActive = true;
+            public bool IsActive => _isActive; 
 
             public TimingThing(Action action)
             {
@@ -85,9 +98,9 @@ namespace Managers
                 Id = GUID.Generate();
             }
 
-            public void Unregister()
+            public void Disable()
             {
-                IsActive = false;
+                _isActive = false;
             }
             
             public void Run()
