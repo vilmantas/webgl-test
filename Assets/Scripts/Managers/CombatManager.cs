@@ -22,7 +22,7 @@ namespace Managers
 
         public void HandleAttack(FighterScript attacker)
         {
-            var defender = GameManagerScript.Instance.GetAdversaryFor(attacker);
+            var defender = GameManager.Instance.GetAdversaryFor(attacker);
             defender.DefendFrom(attacker);
         }
     }

@@ -2,10 +2,10 @@ using System;
 using UnityEngine;
 using TMPro;
 
-public class GameManagerScript : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     [NonSerialized]
-    public static GameManagerScript Instance;
+    public static GameManager Instance;
 
     public FighterScript PlayerFighter;
 
@@ -30,14 +30,12 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        return;
         Text.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        return;
         if (IsGameOver) return;
         if (PlayerFighter.IsDead || AIFighter.IsDead)
         {

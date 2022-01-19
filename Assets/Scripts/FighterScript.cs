@@ -20,14 +20,15 @@ public class FighterScript : MonoBehaviour
 
     public bool IsDead => _fighter.IsDead;
 
-    private float _timeSinceAttack = 0f;
-
     private readonly ConcurrentQueue<FighterCommand> _queue = new ();
 
+    private AutomationManager.TimingThing _autoAttackRegistration;
     // Start is called before the first frame update
     private void Start()
     {
         _fighter = fighterScriptable.Build();
+        _autoAttackRegistration = AutomationManager.Instance.Register(_fighter.AttackSpeed,
+            () => CombatManager.Instance.HandleAttack(this));
         if (HealthScript == null) return;
         HealthScript.Fighter = _fighter;
         IEnumerator coroutine = ProcessCommands();
@@ -37,22 +38,12 @@ public class FighterScript : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (_fighter.Health <= 0)
-        {
-            Debug.Log($"---- {tag} --- Is Dead!");
-            Destroy(gameObject);
-        }
+        if (_fighter.Health > 0) return;
         
-        _timeSinceAttack += Time.deltaTime;
-        
-        if (!CanAttack) return;
-        
-        CombatManager.Instance.HandleAttack(this);
-
-        _timeSinceAttack = 0f;
+        Debug.Log($"---- {tag} --- Is Dead!");
+        _autoAttackRegistration.Disable();
+        Destroy(gameObject);
     }
-
-    private bool CanAttack => _timeSinceAttack > _fighter.AttackSpeed;
 
     public void DefendFrom(FighterScript attacker)
     {

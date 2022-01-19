@@ -125,6 +125,14 @@ public class AutomationManagerTests
     [UnityTest]
     public IEnumerator AutomationManager_CallsTimerMultipleTimes()
     {
+        yield return new WaitForEndOfFrame();
+
+        var run_counter = 0;
         
+        var registration = AutomationManager.Instance.Register(1f, () => { run_counter += 1; });
+
+        yield return new WaitUntil(() => _timeSinceTestStart > 4f || run_counter == 2);
+        
+        Assert.AreEqual(2, run_counter);
     }
 }
