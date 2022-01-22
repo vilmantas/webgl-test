@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Modules;
 using UnityEngine;
 
-public class HealthScript : MonoBehaviour
+public class HealthDisplayScript : MonoBehaviour
 {
     [NonSerialized]
     public Fighter Fighter;
@@ -19,7 +19,10 @@ public class HealthScript : MonoBehaviour
         if (Fighter == null) return;
         Vector3 point = Camera.main.WorldToScreenPoint(transform.position + offset);
         rect.x = point.x - (width / 2);
-        rect.y = Screen.height - point.y - rect.height; 
-        GUI.Box(rect, $"Health: {Fighter.Health}");
+        rect.y = Screen.height - point.y - rect.height;
+        GUI.Box(rect, $"Power: {Fighter.Power}");
+        rect.y -= height;
+        GUI.Box(rect, $"Health: {Fighter.HealthValue}/{Fighter.MaxHealth}");
+
     }
 }

@@ -19,7 +19,7 @@ namespace Tests.EditMode
         [Test]
         public void Fighter_HasHealth()
         {
-            Assert.AreEqual(Health.DEFAULT, _sut.Health);
+            Assert.AreEqual(Health.DEFAULT, _sut.HealthValue);
         }
         
         [Test]
@@ -39,7 +39,7 @@ namespace Tests.EditMode
         {
             var attacker = new Fighter(1, 1, 1);
             attacker.Attack(_sut);
-            Assert.AreEqual(_sut.MaxHealth - attacker.Power, _sut.Health);
+            Assert.AreEqual(_sut.MaxHealth - attacker.Power, _sut.HealthValue);
         }
      }
 }

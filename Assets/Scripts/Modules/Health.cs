@@ -1,15 +1,19 @@
 
+using UnityEngine;
+
 namespace Modules
 {
     public class Health
     {
         public const int DEFAULT = 5;
-        public float Value = DEFAULT;
         public readonly float Max = DEFAULT;
+        private float _realValue = DEFAULT;
 
+        public float Value => Mathf.Max(_realValue, 0);
+        
         public Health(float health)
         {
-            Value = health;
+            _realValue = health;
             Max = health;
         }
 
@@ -17,12 +21,13 @@ namespace Modules
     
         public void Lose(float amount)
         {
-            Value -= amount;
+            _realValue -= amount;
         }
 
         public void Gain(float amount)
         {
-            Value += amount;
+            var newAmount = Value + amount;
+            _realValue = Mathf.Min(newAmount, Max);
         }
 
         public bool IsDead => Value <= 0;

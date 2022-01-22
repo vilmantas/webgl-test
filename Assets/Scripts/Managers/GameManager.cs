@@ -11,7 +11,8 @@ public class GameManager : MonoBehaviour
 
     public FighterScript AIFighter;
 
-    public TextMeshProUGUI Text;
+    public TextMeshProUGUI ResultText;
+    public TextMeshProUGUI ProgressText;
 
     [NonSerialized]
     public bool IsGameOver = false;
@@ -30,23 +31,48 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Text.gameObject.SetActive(false);
+        ResultText.gameObject.SetActive(false);
     }
 
+    private int Wins = 0;
+    
     // Update is called once per frame
     void Update()
     {
+        HandleProgress();
         if (IsGameOver) return;
-        if (PlayerFighter.IsDead || AIFighter.IsDead)
+        if (PlayerFighter.IsDead)
         {
             FinalizeGame();
         }
+
+        if (AIFighter.IsDead)
+        {
+            Wins += 1;
+            if (Wins == 3)
+            {
+                FinalizeGame();
+            }
+            else
+            {
+                AIFighter = Instantiate(AIFighter);
+            }
+        }
+    }
+
+    private void HandleProgress()
+    {
+        if (Wins is 3 or 0) ProgressText.gameObject.SetActive(false);
+        
+        if (Wins is > 0 and < 3 && !ProgressText.gameObject.activeSelf) ProgressText.gameObject.SetActive(true);
+        
+        ProgressText.text = $"{Wins}/3";
     }
 
     public void FinalizeGame()
     {
-        Text.text = PlayerFighter.IsDead ? "Lost!" : "Won!";
-        Text.gameObject.SetActive(true);
+        ResultText.text = PlayerFighter.IsDead ? "Lost!" : "Won!";
+        ResultText.gameObject.SetActive(true);
         IsGameOver = true;
     }
 

@@ -1,25 +1,28 @@
+using DefaultNamespace;
+
 namespace Modules
 {
-    public class Fighter
+    public class Fighter : IAliveObject
     {
-        private readonly Health _health;
+        public Health Health { get; }
+        
         private readonly Strength _strength;
 
         private readonly float _attackSpeed;
 
         public float AttackSpeed => _attackSpeed;
         
-        public float Health => _health.Value;
+        public float HealthValue => Health.Value;
 
-        public float MaxHealth => _health.Max;
+        public float MaxHealth => Health.Max;
 
         public float Power => _strength.Value;
 
-        public bool IsDead => _health.IsDead;
+        public bool IsDead => Health.IsDead;
 
         public Fighter(float health, float strength, float attackSpeed)
         {
-            _health = new Health(health);
+            Health = new Health(health);
             _strength = new Strength(strength);
             _attackSpeed = attackSpeed;
         }
@@ -33,7 +36,7 @@ namespace Modules
 
         public void Defend(Fighter attacker)
         {
-            _health.Lose(attacker.Power);
+            Health.Lose(attacker.Power);
         }
     }
 }

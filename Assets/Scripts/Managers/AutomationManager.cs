@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using UnityEditor;
 using UnityEngine;
@@ -23,7 +24,7 @@ namespace Managers
 
         private bool _updateRunning = false;
 
-        private bool _canRunUpdate = true;
+        private bool _canRunUpdate => !GameManager.Instance.IsGameOver;
         
         private void Awake()
         {
@@ -47,29 +48,35 @@ namespace Managers
             
             _updateRunning = true;
 
-            foreach (var (key, timingThing) in _registrations)
+            foreach (var (key, timingThing) in _registrations.Where(x => x.Value.IsActive))
             {
-                if (!timingThing.IsActive) continue;
-                
-                if (timingThing.WaitTimeRemaining <= 0)
-                {
-                    timingThing.Run();
-                    timingThing.Reset();
-                }
-
-                timingThing.TimeValueRemaining -= TimeDelta;
+                UpdateTiming(timingThing);
             }
             
             _updateRunning = false;
         }
 
-        public TimingThing Register(float interval, Action action)
+        private void UpdateTiming(TimingThing timingThing)
         {
-            var result = new TimingThing(action)
+            if (timingThing.WaitTimeRemaining <= 0 && timingThing.Autorun)
+            {
+                timingThing.Run();
+                timingThing.Reset();
+            }
+
+            var newValue = timingThing.TimeValueRemaining - TimeDelta;
+            timingThing.TimeValueRemaining = Mathf.Max(0, newValue);
+        }
+
+        public TimingThing Register(float interval, Action action, string name = "", bool autoRun = true, bool allowToggle = true)
+        {
+            var result = new TimingThing(action, name)
             {
                 Interval = interval,
                 TimeValueRemaining = interval,
                 TimeScale = timeScale,
+                Autorun = autoRun,
+                AllowAutorunToggle = allowToggle
             };
 
             _registrations.TryAdd(result.Id, result);
@@ -79,23 +86,28 @@ namespace Managers
         
         public class TimingThing
         {
+            public readonly string Name;
             private readonly Action _action;
             public readonly GUID Id;
-            
-            public bool CanActivate => TimeValueRemaining <= 0;
-            public float WaitTimeRemaining => TimeValueRemaining * TimeScale; 
-            
+
             public float TimeValueRemaining;
             public float Interval;
             public float TimeScale;
+            public bool Autorun = true;
+            public bool AllowAutorunToggle = true;
 
             private bool _isActive = true;
             public bool IsActive => _isActive; 
+            public bool CanActivate => TimeValueRemaining <= 0;
+            public float WaitTimeRemaining => TimeValueRemaining * TimeScale;
+            public float IntervalScaled => Interval * TimeScale;
+            public float WaitTimeRemainingPercentage => WaitTimeRemaining / IntervalScaled;
 
-            public TimingThing(Action action)
+            public TimingThing(Action action, string name)
             {
                 _action = action;
                 Id = GUID.Generate();
+                Name = name;
             }
 
             public void Disable()
@@ -111,6 +123,12 @@ namespace Managers
             public void Reset()
             {
                 TimeValueRemaining = Interval;
+            }
+
+            public void ToggleAutorun()
+            {
+                if (!AllowAutorunToggle) return;
+                Autorun = !Autorun;
             }
         }
     }

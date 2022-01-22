@@ -65,7 +65,7 @@ public class AutomationManagerTests
     public IEnumerator AutomationManager_FiresActionAfterTimeElapsed()
     {
         var run_tracker = false;
-        var result = AutomationManager.Instance.Register(1f, () => { run_tracker = true; });
+        var result = AutomationManager.Instance.Register(1f, () => { run_tracker = true; }, "");
 
         yield return new WaitUntil(() => run_tracker || _timeSinceTestStart > 2f);
         

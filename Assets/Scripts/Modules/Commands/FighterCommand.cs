@@ -11,6 +11,7 @@ namespace Modules.Commands
             this._action = action;
         }
         
+        
         public void Run(FighterScript ctx)
         {
             _action.Invoke(ctx);
