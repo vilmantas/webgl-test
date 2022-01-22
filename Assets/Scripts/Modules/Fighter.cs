@@ -4,19 +4,21 @@ namespace Modules
 {
     public class Fighter : IAliveObject
     {
+        public string Name;
+        
         public Health Health { get; }
         
         private readonly Strength _strength;
 
         private readonly float _attackSpeed;
 
+        public float Power => _strength.Value;
+        
         public float AttackSpeed => _attackSpeed;
         
         public float HealthValue => Health.Value;
 
         public float MaxHealth => Health.Max;
-
-        public float Power => _strength.Value;
 
         public bool IsDead => Health.IsDead;
 

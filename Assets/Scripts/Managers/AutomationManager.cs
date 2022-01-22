@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -20,12 +21,14 @@ namespace Managers
 
         public float TimeDelta => Time.deltaTime;
         
-        private ConcurrentDictionary<GUID, TimingThing> _registrations = new ();
+        private readonly ConcurrentDictionary<GUID, TimingRegistration> _registrations = new ();
+
+        private readonly ConcurrentQueue<TimingRegistration> _activatableTimers = new ();
 
         private bool _updateRunning = false;
 
-        private bool _canRunUpdate => !GameManager.Instance.IsGameOver;
-        
+        private static bool _canRunUpdate => !GameManager.IsGameOver;
+
         private void Awake()
         {
             if (Instance != null)
@@ -35,6 +38,12 @@ namespace Managers
             }
 
             Instance = this;
+        }
+
+        private void Start()
+        {
+            IEnumerator coroutine = ProcessCommands();
+            StartCoroutine(coroutine);
         }
 
         private void Update()
@@ -48,35 +57,45 @@ namespace Managers
             
             _updateRunning = true;
 
-            foreach (var (key, timingThing) in _registrations.Where(x => x.Value.IsActive))
-            {
-                UpdateTiming(timingThing);
-            }
-            
+            UpdateTimings();
+
+            RemoveInactiveTimings();
+
             _updateRunning = false;
         }
 
-        private void UpdateTiming(TimingThing timingThing)
+        private void UpdateTimings()
         {
-            if (timingThing.WaitTimeRemaining <= 0 && timingThing.Autorun)
-            {
-                timingThing.Run();
-                timingThing.Reset();
-            }
+            var activeRegistrations = _registrations.Where(x => x.Value.IsActive);
 
-            var newValue = timingThing.TimeValueRemaining - TimeDelta;
-            timingThing.TimeValueRemaining = Mathf.Max(0, newValue);
+            foreach (var (key, timingThing) in activeRegistrations)
+            {
+                UpdateTiming(timingThing);
+            }
         }
 
-        public TimingThing Register(float interval, Action action, string name = "", bool autoRun = true, bool allowToggle = true)
+        private void RemoveInactiveTimings()
         {
-            var result = new TimingThing(action, name)
+            var toRemove = _registrations.Where(x => !x.Value.IsActive).Select(x => x.Key);
+
+            foreach (var key in toRemove)
             {
-                Interval = interval,
-                TimeValueRemaining = interval,
+                _registrations.TryRemove(key, out var _);
+            }
+        }
+
+        private void UpdateTiming(TimingRegistration timingRegistration)
+        {
+            timingRegistration.UpdateRemainingTime(TimeDelta);
+        }
+
+        public TimingRegistration Register(float interval, Action action, string name = "", bool autoRun = true, bool allowToggle = true)
+        {
+            var result = new TimingRegistration(action, name, interval)
+            {
                 TimeScale = timeScale,
                 Autorun = autoRun,
-                AllowAutorunToggle = allowToggle
+                AllowAutorunToggle = allowToggle,
             };
 
             _registrations.TryAdd(result.Id, result);
@@ -84,51 +103,16 @@ namespace Managers
             return result;
         }
         
-        public class TimingThing
+        private IEnumerator ProcessCommands()
         {
-            public readonly string Name;
-            private readonly Action _action;
-            public readonly GUID Id;
-
-            public float TimeValueRemaining;
-            public float Interval;
-            public float TimeScale;
-            public bool Autorun = true;
-            public bool AllowAutorunToggle = true;
-
-            private bool _isActive = true;
-            public bool IsActive => _isActive; 
-            public bool CanActivate => TimeValueRemaining <= 0;
-            public float WaitTimeRemaining => TimeValueRemaining * TimeScale;
-            public float IntervalScaled => Interval * TimeScale;
-            public float WaitTimeRemainingPercentage => WaitTimeRemaining / IntervalScaled;
-
-            public TimingThing(Action action, string name)
+            while (true)
             {
-                _action = action;
-                Id = GUID.Generate();
-                Name = name;
-            }
+                if (_activatableTimers.TryDequeue(out var timer))
+                {
+                    timer.Run();
+                }
 
-            public void Disable()
-            {
-                _isActive = false;
-            }
-            
-            public void Run()
-            {
-                _action.Invoke();
-            }
-
-            public void Reset()
-            {
-                TimeValueRemaining = Interval;
-            }
-
-            public void ToggleAutorun()
-            {
-                if (!AllowAutorunToggle) return;
-                Autorun = !Autorun;
+                yield return null;
             }
         }
     }

@@ -1,9 +1,15 @@
 using System;
+using System.Collections.Generic;
+using ScriptableObjects;
 using UnityEngine;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    public int WinsForVictory = 3;
+
+    public Transform AISpawn;
+    
     [NonSerialized]
     public static GameManager Instance;
 
@@ -14,8 +20,12 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI ResultText;
     public TextMeshProUGUI ProgressText;
 
+    public List<FighterScriptable> Enemies = new();
+
+    private Queue<FighterScriptable> _enemies;
+    
     [NonSerialized]
-    public bool IsGameOver = false;
+    public static bool IsGameOver = false;
 
     private void Awake()
     {
@@ -32,6 +42,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         ResultText.gameObject.SetActive(false);
+
+        _enemies = new Queue<FighterScriptable>(Enemies);
+        
+        PrepareEnemyFighter();
     }
 
     private int Wins = 0;
@@ -49,29 +63,36 @@ public class GameManager : MonoBehaviour
         if (AIFighter.IsDead)
         {
             Wins += 1;
-            if (Wins == 3)
+            if (Wins == WinsForVictory)
             {
                 FinalizeGame();
             }
             else
             {
-                AIFighter = Instantiate(AIFighter);
+                PrepareEnemyFighter();
             }
         }
     }
 
+    private void PrepareEnemyFighter()
+    {
+        AIFighter.fighterScriptable = _enemies.Dequeue();
+        AIFighter = Instantiate(AIFighter, AISpawn);
+    }
+
     private void HandleProgress()
     {
-        if (Wins is 3 or 0) ProgressText.gameObject.SetActive(false);
+        if (Wins == WinsForVictory || Wins == 0) ProgressText.gameObject.SetActive(false);
         
-        if (Wins is > 0 and < 3 && !ProgressText.gameObject.activeSelf) ProgressText.gameObject.SetActive(true);
+        if (Wins > 0 && Wins < WinsForVictory && !ProgressText.gameObject.activeSelf) ProgressText.gameObject.SetActive(true);
         
-        ProgressText.text = $"{Wins}/3";
+        ProgressText.text = $"{Wins}/{WinsForVictory}";
     }
 
     public void FinalizeGame()
     {
         ResultText.text = PlayerFighter.IsDead ? "Lost!" : "Won!";
+        ProgressText.gameObject.SetActive(false);
         ResultText.gameObject.SetActive(true);
         IsGameOver = true;
     }

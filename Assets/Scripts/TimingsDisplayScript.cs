@@ -9,7 +9,7 @@ namespace DefaultNamespace
     public class TimingsDisplayScript : MonoBehaviour
     {
         [NonSerialized]
-        public List<AutomationManager.TimingThing> Timings;
+        public List<TimingRegistration> Timings;
 
         private static int width = 100;
         private static int height = 20;
@@ -20,8 +20,9 @@ namespace DefaultNamespace
         {
             if (Timings == null || Timings.Count == 0) return;
 
-            var z = new AutomationManager.TimingThing[Timings.Count];
-            Timings.CopyTo(z);
+            var timingsCount = Timings.Count;
+            var z = new TimingRegistration[timingsCount];
+            Timings.CopyTo(0, z, 0, timingsCount);
             
             Vector3 point = Camera.main.WorldToScreenPoint(transform.position - offset);
 

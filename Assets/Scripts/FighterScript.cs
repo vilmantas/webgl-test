@@ -24,26 +24,21 @@ public class FighterScript : MonoBehaviour
 
     public bool IsDead => _fighter.IsDead;
 
-    private readonly ConcurrentQueue<FighterCommand> _queue = new ();
+    private readonly ConcurrentQueue<Action> _queue = new();
 
-    private AutomationManager.TimingThing _autoAttackRegistration;
+    private readonly List<TimingRegistration> _timings = new();
 
-    private AutomationManager.TimingThing _healthRegenRegistration;
     // Start is called before the first frame update
     private void Start()
     {
+        if (fighterScriptable == null) return;
+        
         _fighter = fighterScriptable.Build();
-        
-        _autoAttackRegistration = AutomationManager.Instance.Register(_fighter.AttackSpeed,
-            () => CombatManager.Instance.HandleAttack(this), "Attack", allowToggle: false);
 
-        _healthRegenRegistration =
-            AutomationManager.Instance.Register(Random.Range(5,8), () => GainHealth(1), "Regeneration", allowToggle: false);
-        
-        if (healthDisplayScript == null) return;
+        AddTimers();
         
         healthDisplayScript.Fighter = _fighter;
-        timingDisplayScript.Timings = new List<AutomationManager.TimingThing>() { _autoAttackRegistration, _healthRegenRegistration };
+        timingDisplayScript.Timings = _timings;
         
         IEnumerator coroutine = ProcessCommands();
         StartCoroutine(coroutine);
@@ -52,52 +47,75 @@ public class FighterScript : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (_fighter == null) return;
         if (_fighter.HealthValue > 0) return;
         
-        Debug.Log($"---- {tag} --- Is Dead!");
-        _autoAttackRegistration.Disable();
-        Destroy(gameObject);
+        DoDeath();
     }
 
     public void DefendFrom(FighterScript attacker)
     {
-        _queue.Enqueue(new FighterCommand(DefendFromAction(attacker)));
+        _queue.Enqueue(DefendFromAction(attacker));
     }
 
     public void GainHealth(float amount)
     {
-        _queue.Enqueue(new FighterCommand((GainHealthAction(this))));
+        _queue.Enqueue((GainHealthAction(amount)));
     }
 
-    private static Action<FighterScript> DefendFromAction(FighterScript attacker)
+    private Action DefendFromAction(FighterScript attacker)
     {
-        return ctx =>
+        return () =>
         {
-            ctx._fighter.Defend(attacker._fighter);
-            if (ctx._fighter.IsDead) return;
-            ctx.DamageParticles.Play();
+            _fighter.Defend(attacker._fighter);
+            if (_fighter.IsDead) return;
+            DamageParticles.Play();
         };
     }
     
-    private static Action<FighterScript> GainHealthAction(FighterScript wtf)
+    private Action GainHealthAction(float amount)
     {
-        return ctx =>
+        return () =>
         {
-            ctx._fighter.Health.Gain(1);
+            _fighter.Health.Gain(amount);
         };
     }
     
     private IEnumerator ProcessCommands()
     {
-        FighterCommand command;
         while (true)
         {
-            if (_queue.TryDequeue(out command))
+            if (_queue.TryDequeue(out var command))
             {
-                command.Run(this);
+                command.Invoke();
             }
 
             yield return null;
         }
+    }
+
+    private void AddTimers()
+    {
+        var autoAttackRegistration = AutomationManager.Instance.Register(_fighter.AttackSpeed,
+            () => CombatManager.Instance.HandleAttack(this), "Attack", allowToggle: false);
+
+        var healthRegenRegistration =
+            AutomationManager.Instance.Register(Random.Range(5,8), () => GainHealth(1), "Regeneration", allowToggle: false);
+        
+        _timings.Add(autoAttackRegistration);
+        _timings.Add(healthRegenRegistration);
+    }
+
+    private void DoDeath()
+    {
+        Debug.Log($"---- {_fighter.Name} --- Is Dead!");
+        ClearTimings();
+        Destroy(gameObject);
+    }
+
+    private void ClearTimings()
+    {
+        _timings.ForEach(x => x.Disable());
+        _timings.Clear();
     }
 }

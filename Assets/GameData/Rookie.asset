@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1dcec687491d5014fb83cca7e6a41a57, type: 3}
-  m_Name: Player Fighter
+  m_Name: Rookie
   m_EditorClassIdentifier: 
-  Name: Player
+  Name: Rookie
   Health: 15
-  Strength: 3
-  DelayBetweenAttacks: 1.25
+  Strength: 1
+  DelayBetweenAttacks: 1.78

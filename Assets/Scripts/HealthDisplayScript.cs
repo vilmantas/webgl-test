@@ -23,6 +23,8 @@ public class HealthDisplayScript : MonoBehaviour
         GUI.Box(rect, $"Power: {Fighter.Power}");
         rect.y -= height;
         GUI.Box(rect, $"Health: {Fighter.HealthValue}/{Fighter.MaxHealth}");
+        rect.y -= height;
+        GUI.Box(rect, $"{Fighter.Name}");
 
     }
 }
