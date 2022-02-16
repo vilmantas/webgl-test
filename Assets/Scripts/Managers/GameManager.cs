@@ -60,17 +60,16 @@ public class GameManager : MonoBehaviour
             FinalizeGame();
         }
 
-        if (AIFighter.IsDead)
+        if (!AIFighter.IsDead) return;
+        
+        Wins += 1;
+        if (Wins == WinsForVictory)
         {
-            Wins += 1;
-            if (Wins == WinsForVictory)
-            {
-                FinalizeGame();
-            }
-            else
-            {
-                PrepareEnemyFighter();
-            }
+            FinalizeGame();
+        }
+        else
+        {
+            PrepareEnemyFighter();
         }
     }
 
