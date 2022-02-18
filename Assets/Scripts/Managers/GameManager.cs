@@ -41,10 +41,15 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+    }
+
+    private void StartGame()
+    {
         ResultText.gameObject.SetActive(false);
 
         _enemies = new Queue<FighterScriptable>(Enemies);
-        
+
         PrepareEnemyFighter();
     }
 
@@ -52,6 +57,11 @@ public class GameManager : MonoBehaviour
     
     // Update is called once per frame
     void Update()
+    {
+
+    }
+
+    private void UpdateGame()
     {
         HandleProgress();
         if (IsGameOver) return;
@@ -61,7 +71,7 @@ public class GameManager : MonoBehaviour
         }
 
         if (!AIFighter.IsDead) return;
-        
+
         Wins += 1;
         if (Wins == WinsForVictory)
         {

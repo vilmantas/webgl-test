@@ -89,6 +89,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 189e32e7b651432baf5432e985f8af58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &429566072452173327
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7504911618441173005}
+  - component: {fileID: 6222420125534004403}
+  m_Layer: 0
+  m_Name: GlobalsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7504911618441173005
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 429566072452173327}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4515743627819081143}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6222420125534004403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 429566072452173327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e16322674cd249398823454319a5b4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayerSelection: {fileID: 0}
 --- !u!1 &4515743627771754407
 GameObject:
   m_ObjectHideFlags: 0
@@ -134,6 +179,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   WinsForVictory: 3
+  AISpawn: {fileID: 0}
   PlayerFighter: {fileID: 0}
   AIFighter: {fileID: 0}
   ResultText: {fileID: 0}
@@ -173,6 +219,7 @@ Transform:
   - {fileID: 4515743627771754406}
   - {fileID: 26620033}
   - {fileID: 468105655}
+  - {fileID: 7504911618441173005}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

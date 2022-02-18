@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Managers;
 using ScriptableObjects;
 using UnityEngine;
 
@@ -9,7 +10,8 @@ public class ScrollerScript : MonoBehaviour
     public static FighterScriptable SelectedFighter;
 
     public GameObject spawn;
-    
+
+    [HideInInspector]
     public FighterScriptable[] selectables;
 
     public Camera selectionCamera;
@@ -23,9 +25,9 @@ public class ScrollerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        var selection = ScriptableObject.FindObjectOfType<FightersCollection>();
+        Debug.Log(GlobalsManager.Instance == null);
 
-        Debug.Log(selection == null);
+        selectables = GlobalsManager.Instance.PlayerSelection.Fighters;
 
         SelectedFighter = selectables.First();
         _mCurrentIndex = 0;
