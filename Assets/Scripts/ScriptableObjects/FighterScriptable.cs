@@ -19,6 +19,7 @@ namespace ScriptableObjects
         [Range(0.1f, 5)]
         public float DelayBetweenAttacks = 1;
 
+        public GameObject Model;
         
         private Fighter _fighter;
 

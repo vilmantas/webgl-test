@@ -1,17 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ScriptableObjects;
 using UnityEngine;
 
 public class ScrollerScript : MonoBehaviour
 {
+    public static FighterScriptable SelectedFighter;
+
     public GameObject spawn;
     
-    public GameObject[] selectables;
+    public FighterScriptable[] selectables;
 
     public Camera selectionCamera;
-    
-    private GameObject _mCurrentItem;
 
     private GameObject _mCurrentItemInstance;
 
@@ -22,7 +23,11 @@ public class ScrollerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _mCurrentItem = selectables.First();
+        var selection = ScriptableObject.FindObjectOfType<FightersCollection>();
+
+        Debug.Log(selection == null);
+
+        SelectedFighter = selectables.First();
         _mCurrentIndex = 0;
         _mainCamera = Camera.main;
         selectionCamera.enabled = true;
@@ -35,22 +40,22 @@ public class ScrollerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_mCurrentItemInstance == null) _mCurrentItemInstance = Instantiate<GameObject>(_mCurrentItem, spawn.transform);
+        if (_mCurrentItemInstance == null) _mCurrentItemInstance = Instantiate<GameObject>(SelectedFighter.Model, spawn.transform);
 
-        if (Input.GetKeyUp(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             Destroy(_mCurrentItemInstance);
             _mCurrentIndex = (_mCurrentIndex + 1) % selectables.Length;
-            _mCurrentItem = selectables[_mCurrentIndex];
-            _mCurrentItemInstance = Instantiate<GameObject>(_mCurrentItem, spawn.transform);
+            SelectedFighter = selectables[_mCurrentIndex];
+            _mCurrentItemInstance = Instantiate<GameObject>(SelectedFighter.Model, spawn.transform);
         }
 
-        if (Input.GetKeyUp(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             Destroy(_mCurrentItemInstance);
             _mCurrentIndex = ((_mCurrentIndex - 1) + selectables.Length) % selectables.Length;
-            _mCurrentItem = selectables[_mCurrentIndex];
-            _mCurrentItemInstance = Instantiate<GameObject>(_mCurrentItem, spawn.transform); 
+            SelectedFighter = selectables[_mCurrentIndex];
+            _mCurrentItemInstance = Instantiate<GameObject>(SelectedFighter.Model, spawn.transform); 
         }
     }
 }
